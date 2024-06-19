@@ -33,26 +33,43 @@ delete_from_hosts() {
     fi
 }
 
+# Function to view the registered domains in /etc/hosts
+view_hosts() {
+    echo "Registered domains in $hosts_file:"
+    # Print the lines that contain domain registrations
+    grep -vE '^#|^$' "$hosts_file"
+}
+
 # Check if at least one argument is provided
 if [ $# -eq 0 ]; then
-    echo "Usage: wo_domain_registration.sh [add|delete] <domain> [ip_address]"
+    echo "Usage: wo_domain_registration.sh [add|delete|view] <domain> [ip_address]"
     exit 1
 fi
 
-# Check if the first argument is "add" or "delete"
+# Check the action
 case "$1" in
     add)
+        if [ -z "$2" ]; then
+            echo "Please provide a domain to add."
+            exit 1
+        fi
         domain=$2
         ip_address=${3:-$default_ip}
         add_to_hosts "$ip_address" "$domain"
         ;;
     delete)
+        if [ -z "$2" ]; then
+            echo "Please provide a domain to delete."
+            exit 1
+        fi
         domain=$2
         delete_from_hosts "$domain"
         ;;
+    view)
+        view_hosts
+        ;;
     *)
-        echo "Invalid action. Use 'add' or 'delete'."
+        echo "Invalid action. Use 'add', 'delete', or 'view'."
         exit 1
         ;;
 esac
-
